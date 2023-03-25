@@ -4,20 +4,20 @@ import 'package:loginapp/my_w/MyTextField.dart';
 import 'package:loginapp/my_w/logosign.dart';
 import 'package:loginapp/my_w/my_button.dart';
 
-class LoginPage extends StatefulWidget {
+class RegisterPage extends StatefulWidget {
   final Function()? onTap;
-  const LoginPage({super.key, required this.onTap});
+  const RegisterPage({super.key, required this.onTap});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final username = TextEditingController();
 
   final password = TextEditingController();
-
-  void singUIn() async {
+  final confPass = TextEditingController();
+  void singUup() async {
     showDialog(
         context: context,
         builder: (context) {
@@ -26,8 +26,12 @@ class _LoginPageState extends State<LoginPage> {
           );
         });
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: username.text, password: password.text);
+      if (password.text == confPass.text) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: username.text, password: password.text);
+      } else {
+        showErrorMessage();
+      }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         wrongEmailMessage();
@@ -36,6 +40,16 @@ class _LoginPageState extends State<LoginPage> {
       }
     }
     Navigator.pop(context);
+  }
+
+  void showErrorMessage() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const AlertDialog(
+            title: Text('password don\'t match'),
+          );
+        });
   }
 
   void wrongEmailMessage() {
@@ -70,7 +84,7 @@ class _LoginPageState extends State<LoginPage> {
               const Padding(
                   padding: EdgeInsets.all(25),
                   child: Icon(
-                    Icons.login,
+                    Icons.app_registration_rounded,
                     size: 80,
                     color: Color.fromARGB(255, 100, 255, 66),
                   )),
@@ -93,29 +107,26 @@ class _LoginPageState extends State<LoginPage> {
                 child: MyTextField(
                   controller: password,
                   obs: true,
-                  hint: 'Password',
+                  hint: 'Enter the Password',
                 ),
               ),
               const SizedBox(
                 height: 15,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
-                    Text(
-                      'Forgot Password?',
-                      style:
-                          TextStyle(color: Color.fromARGB(255, 142, 142, 142)),
-                    )
-                  ],
-                ),
+                  padding: const EdgeInsets.symmetric(horizontal: 35),
+                  child: MyTextField(
+                    controller: confPass,
+                    obs: true,
+                    hint: 'Reenter the Password',
+                  )),
+              const SizedBox(
+                height: 15,
               ),
               const SizedBox(height: 15),
               MyButton(
-                onTap: singUIn,
-                btname: 'Sign In',
+                onTap: singUup,
+                btname: 'Register',
               ),
               const SizedBox(
                 height: 45,
@@ -162,14 +173,14 @@ class _LoginPageState extends State<LoginPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Not a member?'),
+                  const Text('Already have account'),
                   const SizedBox(
                     width: 5,
                   ),
                   GestureDetector(
                     onTap: widget.onTap,
                     child: const Text(
-                      'Register now',
+                      'Login Now',
                       style: TextStyle(color: Colors.blue),
                     ),
                   ),
